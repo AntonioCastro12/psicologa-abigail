@@ -8,14 +8,35 @@ function scheduleApiPlugin(): Plugin {
     name: 'schedule-api-plugin',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url === '/api/save-schedule' && req.method === 'POST') {
+        const isNetlifyFunction = req.url?.startsWith('/.netlify/functions/schedule');
+        const isLegacyApi = req.url === '/api/save-schedule';
+
+        if (isNetlifyFunction && req.method === 'GET') {
+          try {
+            const publicTarget = path.resolve(__dirname, 'public/schedule.json');
+            const data = fs.readFileSync(publicTarget, 'utf-8');
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(data);
+          } catch {
+            const srcTarget = path.resolve(__dirname, 'src/data/scheduleData.json');
+            const data = fs.readFileSync(srcTarget, 'utf-8');
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(data);
+          }
+          return;
+        }
+
+        if ((isNetlifyFunction || isLegacyApi) && req.method === 'POST') {
           let body = '';
           req.on('data', (chunk) => {
             body += chunk;
           });
           req.on('end', () => {
             try {
-              const data = JSON.parse(body);
+              const parsed = JSON.parse(body);
+              const data = parsed.schedule || parsed;
               const srcTarget = path.resolve(__dirname, 'src/data/scheduleData.json');
               const publicTarget = path.resolve(__dirname, 'public/schedule.json');
 
@@ -30,8 +51,8 @@ function scheduleApiPlugin(): Plugin {
               res.end(
                 JSON.stringify({
                   success: true,
-                  message:
-                    'Horarios guardados directamente en el código de la aplicación (src/data/scheduleData.json)',
+                  schedule: data,
+                  message: '¡Horarios actualizados en la nube y sincronizados!',
                 }),
               );
             } catch (err: any) {

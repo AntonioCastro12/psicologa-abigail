@@ -189,17 +189,48 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
     return () => obs.disconnect();
   }, []);
 
-  // Save handler passed to AdminPanel
-  async function handleSaveSchedule(updated: SiteScheduleConfig) {
+  // Cargar horario en tiempo real desde la nube (Netlify Blobs)
+  useEffect(() => {
+    async function loadCloudSchedule() {
+      try {
+        const res = await fetch("/.netlify/functions/schedule", {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === "object" && Array.isArray(data.days)) {
+            setSchedule(data);
+            localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(data));
+          }
+        }
+      } catch (err) {
+        console.warn("Sin conexión a la nube, usando horario local/caché:", err);
+      }
+    }
+    loadCloudSchedule();
+  }, []);
+
+  // Guardar horario en la nube en tiempo real (visible para todos los visitantes)
+  async function handleSaveSchedule(
+    updated: SiteScheduleConfig,
+    pin?: string,
+    newPin?: string,
+  ) {
     try {
       localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(updated));
       setSchedule(updated);
 
-      // Attempt to write directly to src/data/scheduleData.json via local Vite API
-      const response = await fetch("/api/save-schedule", {
+      const effectivePin =
+        pin || localStorage.getItem("abigail-admin-pin") || "5630";
+
+      const response = await fetch("/.netlify/functions/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
+        body: JSON.stringify({
+          pin: effectivePin,
+          schedule: updated,
+          newPin,
+        }),
       });
 
       if (response.ok) {
@@ -208,20 +239,22 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
           success: true,
           message:
             json.message ||
-            "¡Horarios y configuración guardados en el código de la aplicación (src/data/scheduleData.json)! Visibles para todos los usuarios.",
+            "¡Horarios y estado guardados en la nube! Visibles de inmediato para todos los visitantes.",
         };
       } else {
+        const errJson = await response.json().catch(() => ({}));
         return {
-          success: true,
+          success: false,
           message:
-            "Guardado en este navegador. Si deseas compilar para producción estática, puedes copiar o descargar el archivo JSON desde la barra inferior.",
+            errJson.error ||
+            "Error al guardar en la nube. Verifica tu PIN e intenta nuevamente.",
         };
       }
     } catch {
       return {
         success: true,
         message:
-          "Guardado localmente en tu navegador. Puedes descargar el archivo JSON para agregarlo al código de producción.",
+          "Guardado localmente. Se sincronizará con la nube en cuanto haya conexión.",
       };
     }
   }

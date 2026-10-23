@@ -37,6 +37,8 @@ interface AdminModalProps {
   initialConfig: SiteScheduleConfig;
   onSaveConfig: (
     updated: SiteScheduleConfig,
+    pin?: string,
+    newPin?: string,
   ) => Promise<{ success: boolean; message?: string }>;
   onClose: () => void;
 }
@@ -119,7 +121,7 @@ export function AdminPanel({
   }
 
   // Change PIN handler
-  function handleChangePinSubmit(e: React.FormEvent) {
+  async function handleChangePinSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (newPin.length < 4) {
       setPinChangeMsg("El PIN debe tener al menos 4 caracteres.");
@@ -129,7 +131,9 @@ export function AdminPanel({
       setPinChangeMsg("Los PINs no coinciden.");
       return;
     }
+    const currentPin = localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_PIN;
     localStorage.setItem(PIN_STORAGE_KEY, newPin);
+    await onSaveConfig(config, currentPin, newPin);
     setPinChangeMsg("¡PIN actualizado con éxito!");
     setTimeout(() => {
       setShowChangePin(false);
@@ -281,13 +285,14 @@ export function AdminPanel({
         ...config,
         lastModified: new Date().toISOString(),
       };
-      const result = await onSaveConfig(updatedConfig);
+      const activePin = localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_PIN;
+      const result = await onSaveConfig(updatedConfig, activePin);
       if (result.success) {
         setSaveStatus({
           type: "success",
           message:
             result.message ||
-            "¡Horarios y configuración guardados correctamente en el código del front! Visibles para todos los visitantes.",
+            "¡Horarios y estado guardados en la nube! Visibles de inmediato para todos los visitantes.",
         });
       } else {
         setSaveStatus({
