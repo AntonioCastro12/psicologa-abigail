@@ -23,39 +23,41 @@ import {
   Facebook,
   Menu,
   Check,
+  Lock,
+  ChevronDown,
 } from "lucide-react";
 import "./style.css";
 import "./refinements.css";
+import "./admin.css";
+import initialScheduleData from "./data/scheduleData.json";
+import { SiteScheduleConfig } from "./types/schedule";
+import { ScheduleViewer } from "./components/ScheduleViewer";
+import { AdminPanel } from "./components/AdminPanel";
+import {
+  getScheduleSummaryText,
+  isGoogleCalendarUrl,
+} from "./utils/googleCalendar";
 import { ShareCard } from "./ShareCard";
-const KEY = "abigail-preferencias-v1";
-const defaults = {
-  available: true,
-  phone: "524427045630",
-  message:
-    "Hola, quisiera agendar una cita. ¿Me puedes compartir los horarios disponibles?",
-  intro:
-    "Soy Abigail Sánchez, psicóloga. Te acompaño a comprender lo que sientes y a construir herramientas para tu día a día.",
-  calendar: "",
-  instagram: "",
-  facebook: "",
-  address: "",
-  hours: "",
-  office: "",
-};
-type Config = typeof defaults;
-function readConfig(): Config {
+
+const SCHEDULE_STORAGE_KEY = "abigail-schedule-config";
+
+function readInitialSchedule(): SiteScheduleConfig {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY) || "{}");
-    return Object.fromEntries(
-      Object.entries(defaults).map(([k, val]) => [
-        k,
-        typeof v?.[k] === typeof val ? v[k] : val,
-      ]),
-    ) as Config;
+    const stored = localStorage.getItem(SCHEDULE_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        ...initialScheduleData,
+        ...parsed,
+        days: parsed.days || initialScheduleData.days,
+      } as SiteScheduleConfig;
+    }
   } catch {
-    return { ...defaults };
+    // fallback to bundled JSON
   }
+  return initialScheduleData as SiteScheduleConfig;
 }
+
 function safeUrl(v: string, kind = "") {
   try {
     const u = new URL(v);
@@ -70,6 +72,7 @@ function safeUrl(v: string, kind = "") {
     return "";
   }
 }
+
 const clinical = [
   {
     name: "Orientación Psicológica",
@@ -87,6 +90,7 @@ const clinical = [
     icon: Compass,
   },
 ];
+
 const organizational = [
   {
     name: "Reclutamiento y Selección",
@@ -114,45 +118,119 @@ const organizational = [
     icon: Network,
   },
 ];
+
 function App() {
-  const [config, setConfig] = useState(readConfig),
-    [panel, setPanel] = useState(location.pathname === "/configuracion"),
-    [unlocked, setUnlocked] = useState(false),
-    [pin, setPin] = useState(""),
-    [error, setError] = useState(""),
-    [draft, setDraft] = useState(config),
-    [notice, setNotice] = useState(""),
-    [menu, setMenu] = useState(false);
-  const dialog = useRef<HTMLDialogElement>(null),
-    settingsButton = useRef<HTMLButtonElement>(null);
-  const digits = config.phone.replace(/\D/g, ""),
-    phone = /^\d{10,15}$/.test(digits) ? digits : defaults.phone;
-  const wa = (message = config.message) =>
+  const [schedule, setSchedule] = useState<SiteScheduleConfig>(readInitialSchedule);
+  const [currentView, setCurrentView] = useState<"site" | "admin">(() => {
+    return window.location.pathname === "/admin" ||
+      window.location.pathname === "/configuracion" ||
+      window.location.hash === "#admin"
+      ? "admin"
+      : "site";
+  });
+
+  // Secciones 01, 02 y 03 en tarjetas plegables con botón "Abrir"
+  const [isClinicalOpen, setIsClinicalOpen] = useState(false);
+  const [isOrgOpen, setIsOrgOpen] = useState(false);
+  const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+
+  const [notice, setNotice] = useState("");
+  const [menu, setMenu] = useState(false);
+  const settingsButton = useRef<HTMLButtonElement>(null);
+
+  // Derive phone and links from current schedule
+  const digits = schedule.phone.replace(/\D/g, "");
+  const phone = /^\d{10,15}$/.test(digits) ? digits : "524427045630";
+  const defaultMessage =
+    schedule.whatsappMessage ||
+    "Hola, quisiera agendar una cita. ¿Me puedes compartir los horarios disponibles?";
+
+  const wa = (message = defaultMessage) =>
     `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-  const calendar = safeUrl(config.calendar, "calendar"),
-    instagram = safeUrl(config.instagram),
-    facebook = safeUrl(config.facebook);
+
+  const calendar = isGoogleCalendarUrl(schedule.calendarUrl)
+    ? schedule.calendarUrl
+    : safeUrl(schedule.calendarUrl, "calendar");
+  const instagram = safeUrl(schedule.instagram);
+  const facebook = safeUrl(schedule.facebook);
+
+  // Sync with browser history and hash navigation
   useEffect(() => {
-    if (panel) {
-      dialog.current?.showModal();
-      setDraft(config);
-      setError("");
-    } else {
-      dialog.current?.close();
-      setUnlocked(false);
-      setPin("");
+    const handlePopState = () => {
+      const isAdmin =
+        window.location.pathname === "/admin" ||
+        window.location.pathname === "/configuracion" ||
+        window.location.hash === "#admin";
+      setCurrentView(isAdmin ? "admin" : "site");
+    };
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("hashchange", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("hashchange", handlePopState);
+    };
+  }, []);
+
+  // Save handler passed to AdminPanel
+  async function handleSaveSchedule(updated: SiteScheduleConfig) {
+    try {
+      localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(updated));
+      setSchedule(updated);
+
+      // Attempt to write directly to src/data/scheduleData.json via local Vite API
+      const response = await fetch("/api/save-schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        return {
+          success: true,
+          message:
+            json.message ||
+            "¡Horarios y configuración guardados en el código de la aplicación (src/data/scheduleData.json)! Visibles para todos los usuarios.",
+        };
+      } else {
+        return {
+          success: true,
+          message:
+            "Guardado en este navegador. Si deseas compilar para producción estática, puedes copiar o descargar el archivo JSON desde la barra inferior.",
+        };
+      }
+    } catch {
+      return {
+        success: true,
+        message:
+          "Guardado localmente en tu navegador. Puedes descargar el archivo JSON para agregarlo al código de producción.",
+      };
     }
-  }, [panel]);
+  }
+
+  function openAdmin() {
+    setCurrentView("admin");
+    if (window.location.pathname !== "/admin") {
+      history.pushState(null, "", "/admin");
+    }
+  }
+
+  function closeAdmin() {
+    setCurrentView("site");
+    if (
+      window.location.pathname === "/admin" ||
+      window.location.pathname === "/configuracion"
+    ) {
+      history.pushState(null, "", "/");
+    }
+  }
+
   useEffect(() => {
     if (!notice) return;
     const t = setTimeout(() => setNotice(""), 5000);
     return () => clearTimeout(t);
   }, [notice]);
-  useEffect(() => {
-    const fn = () => setConfig(readConfig());
-    window.addEventListener("storage", fn);
-    return () => window.removeEventListener("storage", fn);
-  }, []);
+
   useEffect(() => {
     if (!("IntersectionObserver" in window)) return;
     const o = new IntersectionObserver(
@@ -171,12 +249,7 @@ function App() {
     });
     return () => o.disconnect();
   }, []);
-  function closePanel() {
-    setPanel(false);
-    if (location.pathname === "/configuracion")
-      history.replaceState(null, "", "/");
-    settingsButton.current?.focus();
-  }
+
   function saveContact() {
     const content = `BEGIN:VCARD\r\nVERSION:3.0\r\nN:Sánchez;Abigail;;;\r\nFN:Abigail Sánchez\r\nTITLE:Psicóloga\r\nTEL;TYPE=CELL:+${phone}\r\nEMAIL:ma.sanvag@gmail.com\r\nEND:VCARD\r\n`;
     const url = URL.createObjectURL(
@@ -189,38 +262,7 @@ function App() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice("Contacto descargado. Ábrelo para guardarlo en tu teléfono.");
   }
-  function save(e: React.FormEvent) {
-    e.preventDefault();
-    const clean = draft.phone.replace(/\D/g, "");
-    if (!/^\d{10,15}$/.test(clean)) {
-      setError("Escribe de 10 a 15 dígitos, incluido el código de país.");
-      return;
-    }
-    if (draft.calendar && !safeUrl(draft.calendar, "calendar")) {
-      setError(
-        "Usa un enlace HTTPS de calendar.google.com o calendar.app.google.",
-      );
-      return;
-    }
-    if (
-      (draft.instagram && !safeUrl(draft.instagram)) ||
-      (draft.facebook && !safeUrl(draft.facebook))
-    ) {
-      setError("Los enlaces de redes deben comenzar con https://.");
-      return;
-    }
-    const next = { ...draft, phone: clean };
-    try {
-      localStorage.setItem(KEY, JSON.stringify(next));
-      setConfig(next);
-      closePanel();
-      setNotice("Cambios guardados únicamente en este navegador.");
-    } catch {
-      setError(
-        "No se pudo guardar. Revisa si tu navegador permite almacenamiento local.",
-      );
-    }
-  }
+
   const Booking = ({
     label = "Agendar cita",
     className = "button",
@@ -228,12 +270,13 @@ function App() {
     label?: string;
     className?: string;
   }) =>
-    config.available ? (
+    schedule.available ? (
       <a
         className={className}
-        href={calendar || wa(defaults.message)}
+        href={calendar || wa(defaultMessage)}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => setIsAgendaOpen(true)}
       >
         <CalendarDays size={18} />
         {label}
@@ -245,9 +288,10 @@ function App() {
         Agenda cerrada
       </button>
     );
+
   const Whatsapp = ({
     label = "WhatsApp",
-    message = config.message,
+    message = defaultMessage,
     className = "button outline",
   }: {
     label?: string;
@@ -264,6 +308,7 @@ function App() {
       {label}
     </a>
   );
+
   return (
     <>
       <a className="skip" href="#inicio">
@@ -288,12 +333,25 @@ function App() {
             ["agenda", "Agenda"],
             ["contacto", "Contacto"],
           ].map(([id, label]) => (
-            <a key={id} href={`#${id}`} onClick={() => setMenu(false)}>
+            <a
+              key={id}
+              href={`#${id}`}
+              onClick={() => {
+                setMenu(false);
+                if (id === "clinicos") setIsClinicalOpen(true);
+                if (id === "organizaciones") setIsOrgOpen(true);
+                if (id === "agenda") setIsAgendaOpen(true);
+              }}
+            >
               {label}
             </a>
           ))}
         </nav>
-        <a className="button small header-book" href="#agenda">
+        <a
+          className="button small header-book"
+          href="#agenda"
+          onClick={() => setIsAgendaOpen(true)}
+        >
           Agendar cita <ArrowUpRight size={16} />
         </a>
         <button
@@ -308,9 +366,9 @@ function App() {
       <main>
         <section className="hero" id="inicio">
           <div className="hero-copy">
-            <span className={`status ${!config.available ? "closed" : ""}`}>
+            <span className={`status ${!schedule.available ? "closed" : ""}`}>
               <i />
-              {config.available
+              {schedule.available
                 ? "Disponible para citas"
                 : "Agenda cerrada temporalmente"}
             </span>
@@ -326,7 +384,10 @@ function App() {
                 tu bienestar.
               </em>
             </h1>
-            <p className="intro">{config.intro}</p>
+            <p className="intro">
+              Soy Abigail Sánchez, psicóloga. Te acompaño a comprender lo que
+              sientes y a construir herramientas para tu día a día.
+            </p>
             <div className="actions">
               <Booking />
               <Whatsapp />
@@ -347,165 +408,244 @@ function App() {
               <a href="mailto:ma.sanvag@gmail.com">ma.sanvag@gmail.com</a>
             </p>
           </div>
-          <div className="hero-art">
-            <div className="stripes top" />
+          <div className="hero-art clean-hero-art">
             <img
-              className="botanical"
-              src="/ilustracion.png"
-              width="461"
-              height="308"
-              alt="Ilustración de la tarjeta original: mente, corazón y hojas entrelazados"
+              className="botanical hero-logo-clean"
+              src="/ilustracion.png?v=2"
+              width="1024"
+              height="682"
+              alt="Emblema de Abigail Sánchez: mente, corazón y hojas entrelazados"
             />
-            <div className="signature">
-              <img
-                src="/marca.png"
-                width="630"
-                height="470"
-                alt="Monograma AS de Abigail Sánchez"
-              />
-              <span>
-                ABIGAIL SÁNCHEZ<small>PSICÓLOGA</small>
-              </span>
-            </div>
-            <div className="stripes bottom" />
           </div>
         </section>
+
         <div className="approach">
           <span>Un acompañamiento cercano, a tu ritmo.</span>
           <span>
             Enfoque cognitivo-conductual <ArrowUpRight size={17} />
           </span>
         </div>
-        <section className="section reveal" id="clinicos">
-          <div className="section-heading">
+
+        {/* SECCIÓN 01: SERVICIOS CLÍNICOS EN TARJETA PLEGABLE */}
+        <section
+          className={`section-card clinical-card-section reveal ${isClinicalOpen ? "is-open" : "is-folded"}`}
+          id="clinicos"
+        >
+          <div
+            className="section-card-header"
+            onClick={() => setIsClinicalOpen(!isClinicalOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsClinicalOpen(!isClinicalOpen);
+              }
+            }}
+            aria-expanded={isClinicalOpen}
+            title={isClinicalOpen ? "Toca para cerrar" : "Toca para abrir"}
+          >
             <div>
               <p className="eyebrow">01 / ATENCIÓN PERSONAL</p>
               <h2>Servicios Clínicos</h2>
+              <p className="section-card-subtitle">
+                Cada proceso es diferente. Encuentra el acompañamiento para ti.
+              </p>
             </div>
-            <p>
-              Cada proceso es diferente.
-              <br />
-              Encuentra el acompañamiento para ti.
-            </p>
+            <button
+              type="button"
+              className="card-toggle-pill"
+              aria-label={isClinicalOpen ? "Cerrar servicios clínicos" : "Abrir servicios clínicos"}
+            >
+              <span>{isClinicalOpen ? "Cerrar" : "Abrir"}</span>
+              <ChevronDown
+                size={20}
+                className={`card-chevron-icon ${isClinicalOpen ? "rotated" : ""}`}
+              />
+            </button>
           </div>
-          <div className="clinical-grid">
-            {clinical.map(({ name, text, icon: Icon }, i) => (
-              <article className="clinical-card" key={name}>
-                <div className="card-top">
-                  <Icon size={29} strokeWidth={1.2} />
-                  <span>0{i + 1}</span>
-                </div>
-                <h3>{name}</h3>
-                <p>{text}</p>
-                <a
-                  className="text-link"
-                  href={
-                    config.available && calendar
-                      ? calendar
-                      : wa(
-                          `Hola, quisiera información para una cita de ${name.toLowerCase()}.`,
-                        )
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {config.available ? "Agendar cita" : "Consultar por WhatsApp"}
-                  <ArrowUpRight size={18} />
-                </a>
-              </article>
-            ))}
-          </div>
+
+          {isClinicalOpen && (
+            <div className="section-card-body">
+              <div className="clinical-grid">
+                {clinical.map(({ name, text, icon: Icon }, i) => (
+                  <article className="clinical-card" key={name}>
+                    <div className="card-top">
+                      <Icon size={29} strokeWidth={1.2} />
+                      <span>0{i + 1}</span>
+                    </div>
+                    <h3>{name}</h3>
+                    <p>{text}</p>
+                    <a
+                      className="text-link"
+                      href={
+                        schedule.available && calendar
+                          ? calendar
+                          : wa(
+                              `Hola, quisiera información para una cita de ${name.toLowerCase()}.`,
+                            )
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsAgendaOpen(true)}
+                    >
+                      {schedule.available ? "Agendar cita" : "Consultar por WhatsApp"}
+                      <ArrowUpRight size={18} />
+                    </a>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
-        <section className="section organization reveal" id="organizaciones">
-          <div className="org-intro">
-            <p className="eyebrow">02 / PERSONAS Y ORGANIZACIONES</p>
-            <h2>
-              El bienestar también
-              <br />
-              <em>se construye en equipo.</em>
-            </h2>
-            <p>Servicios Organizacionales</p>
-            <p className="muted">
-              Herramientas para acompañar el desarrollo de las personas y
-              fortalecer tu organización.
-            </p>
-            <div className="org-art" aria-hidden="true">
-              <div />
-              <div />
-              <div />
-            </div>
-          </div>
-          <div className="org-services">
-            {organizational.map(({ name, text, icon: Icon }) => (
-              <article key={name}>
-                <Icon size={24} strokeWidth={1.3} />
-                <div>
-                  <h3>{name}</h3>
-                  <p>{text}</p>
-                  <a
-                    className="text-link"
-                    href={wa(
-                      `Hola, quisiera recibir información sobre el servicio de ${name}.`,
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Solicitar información <ArrowUpRight size={16} />
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-        <section className="section agenda reveal" id="agenda">
-          <div>
-            <p className="eyebrow">03 / TU PRÓXIMO PASO</p>
-            <h2>Agenda tu cita</h2>
-            <p>
-              {calendar
-                ? "Consulta los horarios disponibles y selecciona el que mejor se adapte a ti."
-                : "Escríbeme por WhatsApp para consultar los horarios disponibles y encontrar un espacio para ti."}
-            </p>
-            <div className="modalities">
-              <span>
-                <MapPin size={18} /> Presencial
-              </span>
-              <span>
-                <Video size={18} /> Virtual
-              </span>
-            </div>
-          </div>
-          <div className="availability">
-            <span className={`status ${!config.available ? "closed" : ""}`}>
-              <i />
-              {config.available
-                ? "Agenda abierta"
-                : "Agenda temporalmente cerrada"}
-            </span>
-            <h3>Disponibilidad</h3>
-            <p>
-              {config.available
-                ? "Agenda disponible para nuevas citas."
-                : "Por el momento no se están recibiendo nuevas citas."}
-            </p>
-            <Booking
-              label={
-                calendar
-                  ? "Ver horarios disponibles"
-                  : "Consultar horarios por WhatsApp"
+
+        {/* SECCIÓN 02: SERVICIOS ORGANIZACIONALES EN TARJETA PLEGABLE */}
+        <section
+          className={`section-card org-card-section reveal ${isOrgOpen ? "is-open" : "is-folded"}`}
+          id="organizaciones"
+        >
+          <div
+            className="section-card-header"
+            onClick={() => setIsOrgOpen(!isOrgOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsOrgOpen(!isOrgOpen);
               }
-            />
-            <Whatsapp
-              label={
-                config.available
-                  ? "Agendar por WhatsApp"
-                  : "Contactar por WhatsApp"
-              }
-              message={defaults.message}
-              className="text-link"
-            />
+            }}
+            aria-expanded={isOrgOpen}
+            title={isOrgOpen ? "Toca para cerrar" : "Toca para abrir"}
+          >
+            <div>
+              <p className="eyebrow">02 / PERSONAS Y ORGANIZACIONES</p>
+              <h2>Servicios Organizacionales</h2>
+              <p className="section-card-subtitle">
+                Herramientas para acompañar el desarrollo de las personas y fortalecer tu organización.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="card-toggle-pill"
+              aria-label={isOrgOpen ? "Cerrar servicios organizacionales" : "Abrir servicios organizacionales"}
+            >
+              <span>{isOrgOpen ? "Cerrar" : "Abrir"}</span>
+              <ChevronDown
+                size={20}
+                className={`card-chevron-icon ${isOrgOpen ? "rotated" : ""}`}
+              />
+            </button>
           </div>
+
+          {isOrgOpen && (
+            <div className="section-card-body">
+              <div className="org-intro-block">
+                <h2>
+                  El bienestar también
+                  <br />
+                  <em>se construye en equipo.</em>
+                </h2>
+                <div className="org-art" aria-hidden="true">
+                  <div />
+                  <div />
+                  <div />
+                </div>
+              </div>
+              <div className="org-services">
+                {organizational.map(({ name, text, icon: Icon }) => (
+                  <article key={name}>
+                    <Icon size={24} strokeWidth={1.3} />
+                    <div>
+                      <h3>{name}</h3>
+                      <p>{text}</p>
+                      <a
+                        className="text-link"
+                        href={wa(
+                          `Hola, quisiera recibir información sobre el servicio de ${name}.`,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Solicitar información <ArrowUpRight size={16} />
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
+
+        {/* SECCIÓN 03: AGENDA Y HORARIOS EN TARJETA PLEGABLE */}
+        <section
+          className={`section-card agenda-card-section agenda reveal ${isAgendaOpen ? "is-open" : "is-folded"}`}
+          id="agenda"
+        >
+          <div
+            className="section-card-header"
+            onClick={() => setIsAgendaOpen(!isAgendaOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsAgendaOpen(!isAgendaOpen);
+              }
+            }}
+            aria-expanded={isAgendaOpen}
+            title={isAgendaOpen ? "Toca para cerrar" : "Toca para abrir"}
+          >
+            <div>
+              <p className="eyebrow">03 / TU PRÓXIMO PASO</p>
+              <h2>Agenda tu cita</h2>
+              <p className="section-card-subtitle">
+                {isAgendaOpen
+                  ? "Consulta los horarios disponibles y reserva tu espacio."
+                  : "Toca para desplegar horarios y reservar."}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="card-toggle-pill"
+              aria-label={isAgendaOpen ? "Cerrar agenda" : "Abrir agenda"}
+            >
+              <span>{isAgendaOpen ? "Cerrar" : "Abrir"}</span>
+              <ChevronDown
+                size={20}
+                className={`card-chevron-icon ${isAgendaOpen ? "rotated" : ""}`}
+              />
+            </button>
+          </div>
+
+          {isAgendaOpen && (
+            <div className="section-card-body agenda-body-layout">
+              <div className="agenda-intro-col">
+                <p>
+                  {calendar
+                    ? "Consulta los horarios disponibles y selecciona el que mejor se adapte a ti."
+                    : "Escríbeme por WhatsApp para consultar los horarios disponibles y encontrar un espacio para ti."}
+                </p>
+                <div className="modalities">
+                  <span>
+                    <MapPin size={18} /> Presencial
+                  </span>
+                  <span>
+                    <Video size={18} /> Virtual
+                  </span>
+                </div>
+                <div className="agenda-actions-wrapper">
+                  <Booking />
+                  <Whatsapp />
+                </div>
+              </div>
+              <div className="agenda-viewer-col">
+                <ScheduleViewer schedule={schedule} />
+              </div>
+            </div>
+          )}
+        </section>
+
         <section className="section contact reveal" id="contacto">
           <div>
             <p className="eyebrow">04 / ESTAMOS EN CONTACTO</p>
@@ -522,7 +662,7 @@ function App() {
               <div>
                 <small>TELÉFONO Y WHATSAPP</small>
                 <span>
-                  {phone === defaults.phone ? "+52 442 704 5630" : `+${phone}`}
+                  {phone === "524427045630" ? "+52 442 704 5630" : `+${phone}`}
                 </span>
               </div>
               <ArrowUpRight size={20} />
@@ -539,17 +679,20 @@ function App() {
               <MapPin size={20} />
               <div>
                 <small>ATENCIÓN PRESENCIAL Y VIRTUAL</small>
-                {config.office && <strong>{config.office}</strong>}
+                {schedule.officeName && <strong>{schedule.officeName}</strong>}
                 <p>
-                  {config.address ||
+                  {schedule.address ||
                     "Consulta la ubicación del consultorio por WhatsApp."}
                 </p>
-                {config.hours && <p>{config.hours}</p>}
+                <p className="schedule-summary-contact">
+                  <strong>Horarios: </strong>
+                  {getScheduleSummaryText(schedule.days)}
+                </p>
                 <a
                   className="text-link"
                   href={
-                    config.address
-                      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(config.address)}`
+                    schedule.address
+                      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(schedule.address)}`
                       : wa(
                           "Hola, quisiera conocer la ubicación del consultorio y los horarios de atención.",
                         )
@@ -557,7 +700,7 @@ function App() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {config.address ? "Cómo llegar" : "Consultar ubicación"}
+                  {schedule.address ? "Cómo llegar" : "Consultar ubicación"}
                   <ArrowUpRight size={16} />
                 </a>
               </div>
@@ -578,8 +721,10 @@ function App() {
             )}
           </div>
         </section>
+
         <ShareCard />
       </main>
+
       <footer>
         <a className="brand" href="#inicio">
           AS
@@ -588,159 +733,60 @@ function App() {
           </span>
         </a>
         <span>Psicología y servicios organizacionales</span>
-        <button
-          ref={settingsButton}
-          aria-label="Configuración local"
-          title="Configuración local"
-          onClick={() => setPanel(true)}
-        >
-          <Settings size={17} />
-        </button>
+
+        <div className="footer-actions">
+          <button
+            type="button"
+            className="admin-link-btn"
+            onClick={openAdmin}
+            title="Panel de Administración (Días, Horarios y Google Calendar)"
+          >
+            <Lock size={14} /> Panel Administrador
+          </button>
+          <button
+            type="button"
+            ref={settingsButton}
+            aria-label="Panel Administrador"
+            title="Panel Administrador"
+            onClick={openAdmin}
+          >
+            <Settings size={17} />
+          </button>
+        </div>
       </footer>
+
       <div className="floating">
         <Booking className="button small" />
         <Whatsapp className="button small floating-wa" />
       </div>
+
       {notice && (
         <div className="toast" role="status">
           <Check size={18} />
           {notice}
         </div>
       )}
-      <dialog
-        ref={dialog}
-        onCancel={closePanel}
-        onClick={(e) => {
-          if (e.target === dialog.current) closePanel();
-        }}
-        aria-labelledby="settings-title"
-      >
-        <div className="dialog-content">
-          <button
-            className="close"
-            onClick={closePanel}
-            aria-label="Cerrar configuración"
-          >
-            <X />
-          </button>
-          <p className="eyebrow">SOLO EN ESTE NAVEGADOR</p>
-          <h2 id="settings-title">Configuración local</h2>
-          {!unlocked ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (pin === "5630") {
-                  setUnlocked(true);
-                  setError("");
-                } else setError("PIN incorrecto. Inténtalo de nuevo.");
-              }}
-            >
-              <p>
-                Introduce el PIN para editar las preferencias de esta tarjeta en
-                tu dispositivo.
-              </p>
-              <label>
-                PIN
-                <input
-                  type="password"
-                  autoComplete="off"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  required
-                />
-              </label>
-              {error && (
-                <p className="error" role="alert">
-                  {error}
-                </p>
-              )}
-              <button className="button" type="submit">
-                Entrar
-              </button>
-              <p className="fine">
-                El PIN evita cambios accidentales. No protege información
-                privada.
-              </p>
-            </form>
-          ) : (
-            <form onSubmit={save}>
-              <p className="local-note">
-                Los cambios solo se guardan en este navegador. Tus visitantes no
-                los verán. Para actualizar la tarjeta para todos, modifica la
-                configuración del sitio y vuelve a publicarlo. Gestiona los
-                horarios reales en Google Calendar.
-              </p>
-              <label className="toggle-row">
-                Disponible para citas
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={draft.available}
-                  onChange={(e) =>
-                    setDraft({ ...draft, available: e.target.checked })
-                  }
-                />
-              </label>
-              {(
-                [
-                  ["phone", "Número de WhatsApp (con código de país)"],
-                  ["message", "Mensaje de WhatsApp"],
-                  ["intro", "Texto de presentación"],
-                  ["calendar", "Enlace de reserva de Google Calendar"],
-                  ["office", "Nombre del consultorio"],
-                  ["address", "Dirección completa"],
-                  ["hours", "Horarios generales"],
-                  ["instagram", "Enlace de Instagram"],
-                  ["facebook", "Enlace de Facebook"],
-                ] as const
-              ).map(([key, label]) => (
-                <label key={key}>
-                  {label}
-                  {key === "intro" || key === "message" ? (
-                    <textarea
-                      rows={3}
-                      value={draft[key]}
-                      onChange={(e) =>
-                        setDraft({ ...draft, [key]: e.target.value })
-                      }
-                      required
-                    />
-                  ) : (
-                    <input
-                      type={
-                        ["calendar", "instagram", "facebook"].includes(key)
-                          ? "url"
-                          : "text"
-                      }
-                      value={draft[key]}
-                      onChange={(e) =>
-                        setDraft({ ...draft, [key]: e.target.value })
-                      }
-                      required={key === "phone"}
-                    />
-                  )}
-                </label>
-              ))}
-              {error && (
-                <p className="error" role="alert">
-                  {error}
-                </p>
-              )}
-              <button className="button" type="submit">
-                Guardar en este navegador <Check size={18} />
-              </button>
-            </form>
-          )}
-        </div>
-      </dialog>
+
+      {/* PANEL DE ADMINISTRADOR EN MODAL RESPONSIVO */}
+      <AdminPanel
+        isOpen={currentView === "admin"}
+        initialConfig={schedule}
+        onSaveConfig={handleSaveSchedule}
+        onClose={closeAdmin}
+      />
     </>
   );
 }
+
 function IntroCard() {
+  const isDirectAdmin =
+    location.pathname === "/admin" ||
+    location.pathname === "/configuracion" ||
+    location.hash === "#admin";
+
   const [showIntro, setShowIntro] = useState(
-    () => location.pathname !== "/configuracion" &&
+    () =>
+      !isDirectAdmin &&
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
 
@@ -751,7 +797,9 @@ function IntroCard() {
     const finish = () => setShowIntro(false);
     const timeout = window.setTimeout(finish, 2000);
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onMotionChange = () => { if (motion.matches) finish(); };
+    const onMotionChange = () => {
+      if (motion.matches) finish();
+    };
     motion.addEventListener("change", onMotionChange);
     return () => {
       window.clearTimeout(timeout);
@@ -769,9 +817,21 @@ function IntroCard() {
         <div className="opening-intro" aria-label="Abigail Sánchez, psicóloga">
           <div className="opening-intro-content">
             <div className="opening-emblem">
-              <span className="opening-lines opening-lines-right" aria-hidden="true" />
-              <span className="opening-lines opening-lines-left" aria-hidden="true" />
-              <img className="opening-logo" src="/ilustracion.png" alt="Emblema de Abigail Sánchez: mente, corazón y hojas entrelazados" width="461" height="308" />
+              <span
+                className="opening-lines opening-lines-right"
+                aria-hidden="true"
+              />
+              <span
+                className="opening-lines opening-lines-left"
+                aria-hidden="true"
+              />
+              <img
+                className="opening-logo"
+                src="/ilustracion.png?v=2"
+                alt="Emblema de Abigail Sánchez: mente, corazón y hojas entrelazados"
+                width="1024"
+                height="682"
+              />
             </div>
             <div className="opening-name">
               <p>Abigail Sánchez</p>

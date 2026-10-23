@@ -1,0 +1,122 @@
+{
+  "available": true,
+  "sessionDurationMinutes": 50,
+  "notice": "Atención psicológica presencial y virtual previa reservación.",
+  "calendarUrl": "",
+  "googleCalendarEmail": "ma.sanvag@gmail.com",
+  "phone": "524427045630",
+  "whatsappMessage": "Hola, quisiera agendar una cita. ¿Me puedes compartir los horarios disponibles?",
+  "officeName": "",
+  "address": "",
+  "instagram": "",
+  "facebook": "",
+  "days": [
+    {
+      "dayId": "lunes",
+      "dayName": "Lunes",
+      "shortName": "Lun",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        },
+        {
+          "start": "16:00",
+          "end": "20:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "martes",
+      "dayName": "Martes",
+      "shortName": "Mar",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        },
+        {
+          "start": "16:00",
+          "end": "20:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "miercoles",
+      "dayName": "Miércoles",
+      "shortName": "Mié",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        },
+        {
+          "start": "16:00",
+          "end": "20:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "jueves",
+      "dayName": "Jueves",
+      "shortName": "Jue",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        },
+        {
+          "start": "16:00",
+          "end": "20:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "viernes",
+      "dayName": "Viernes",
+      "shortName": "Vie",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        },
+        {
+          "start": "16:00",
+          "end": "20:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "sabado",
+      "dayName": "Sábado",
+      "shortName": "Sáb",
+      "active": true,
+      "ranges": [
+        {
+          "start": "09:00",
+          "end": "14:00"
+        }
+      ],
+      "modality": "ambas"
+    },
+    {
+      "dayId": "domingo",
+      "dayName": "Domingo",
+      "shortName": "Dom",
+      "active": false,
+      "ranges": [],
+      "modality": "ambas"
+    }
+  ],
+  "lastModified": "2026-10-23T19:48:35.087Z"
+}

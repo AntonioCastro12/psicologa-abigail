@@ -1,0 +1,1701 @@
+/* ==========================================================================
+   PANEL ADMINISTRADOR EN MODAL RESPONSIVO Y SECCIONES PLEGABLES (01, 02 Y 03)
+   ========================================================================== */
+
+/* Fondo oscurecido con desenfoque para el Modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 34, 27, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.22s ease-out;
+}
+
+/* Ventana del modal (100% responsiva) */
+.admin-modal-window {
+  width: min(880px, 100%);
+  max-height: min(92vh, 850px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #c8bcb280;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(58, 44, 35, 0.32);
+  overflow: hidden;
+  animation: modalScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #4f3f35;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Encabezado del modal */
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: #faf7f4;
+  border-bottom: 1px solid #a08c7830;
+  flex-shrink: 0;
+}
+
+.admin-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-logo-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #776050;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.admin-modal-title-group h2 {
+  font: normal 20px/1.2 Georgia, serif;
+  color: #554134;
+  margin: 0;
+}
+
+.admin-modal-title-group p {
+  font-size: 12px;
+  color: #8a7667;
+  margin: 3px 0 0;
+}
+
+.admin-modal-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: #ffffff;
+  border: 1px solid #a08c7850;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #604d40;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-pill:hover {
+  background: #f0e8e2;
+  border-color: #776050;
+}
+
+.admin-modal-close-btn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: #ffffff;
+  border: 1px solid #a08c7840;
+  border-radius: 50%;
+  color: #604d40;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-modal-close-btn:hover {
+  background: #f1eae4;
+  color: #38271c;
+  transform: rotate(90deg);
+}
+
+/* Pantalla de autenticación por PIN */
+.admin-modal-auth-body {
+  padding: 40px 24px;
+  display: grid;
+  place-items: center;
+  flex: 1;
+  background: #fcfbfa;
+}
+
+.admin-auth-box {
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.auth-icon-wrap {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #f3ece6;
+  border: 1px solid #a08c7840;
+  display: grid;
+  place-items: center;
+  color: #776050;
+}
+
+.admin-auth-box h3 {
+  font: normal 22px/1.2 Georgia, serif;
+  color: #554134;
+  margin: 0 0 8px;
+}
+
+.admin-auth-box p {
+  font-size: 14px;
+  color: #7c6859;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.admin-auth-form input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #a08c7880;
+  border-radius: 12px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 6px;
+  background: #ffffff;
+  color: #493b31;
+  box-sizing: border-box;
+}
+
+.admin-auth-form input:focus {
+  outline: 2px solid #776050;
+  border-color: #776050;
+}
+
+.error-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #a33a38;
+  background: #faeaea;
+  border: 1px solid #f3c2c0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin: 12px 0 0;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.admin-btn-enter {
+  flex: 1;
+}
+
+.auth-hint {
+  display: block;
+  font-size: 12px;
+  color: #928073;
+  margin-top: 16px;
+}
+
+/* Barra de pestañas con scroll táctil en móvil */
+.admin-modal-tabs {
+  display: flex;
+  background: #f7f3ef;
+  border-bottom: 1px solid #a08c7830;
+  padding: 0 16px;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.admin-modal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-modal-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #7a6657;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.admin-modal-tab:hover {
+  color: #4f3f35;
+  background: #ffffff60;
+}
+
+.admin-modal-tab.active {
+  color: #776050;
+  border-bottom-color: #776050;
+  font-weight: 600;
+  background: #ffffff;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Banner de estatus */
+.admin-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+  animation: slideDown 0.25s ease;
+}
+
+.banner-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-status-banner.success {
+  background: #e6f4ea;
+  color: #1e6333;
+  border-bottom: 1px solid #b7e1cd;
+}
+
+.admin-status-banner.error {
+  background: #fce8e6;
+  color: #a33a38;
+  border-bottom: 1px solid #fad2cf;
+}
+
+.close-banner {
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  padding: 0 4px;
+}
+
+/* Cuerpo con scroll suave */
+.admin-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Interruptor general switch-card */
+.switch-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #faf7f4;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid #a08c7830;
+}
+
+.switch-copy strong {
+  display: block;
+  font-size: 14px;
+  color: #493b31;
+}
+
+.switch-copy p {
+  font-size: 12px;
+  margin: 3px 0 0;
+  color: #796658;
+}
+
+/* Toggle switch styling */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #c9bfb8;
+  transition: 0.25s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.25s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+input:checked + .slider {
+  background-color: #487350;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Columnas de campos */
+.admin-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.admin-field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-field-box label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #554134;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-field-box select,
+.admin-field-box input {
+  padding: 11px 14px;
+  border: 1px solid #a08c7860;
+  border-radius: 10px;
+  background: #faf8f5;
+  font-size: 14px;
+  color: #493b31;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Plantillas rápidas */
+.admin-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #fdfbf9;
+  border: 1px dashed #a08c7850;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.presets-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #776050;
+}
+
+.preset-btn {
+  background: #ffffff;
+  border: 1px solid #a08c7840;
+  color: #5d4a3e;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-btn:hover {
+  background: #776050;
+  color: #ffffff;
+  border-color: #776050;
+}
+
+/* Grilla de Días de la semana en Admin */
+.days-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.day-editor-card {
+  border: 1px solid #a08c7835;
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: #faf8f5;
+  transition: all 0.2s;
+}
+
+.day-editor-card.is-active {
+  border-color: #a08c7880;
+  background: #ffffff;
+  box-shadow: 0 3px 10px #77605008;
+}
+
+.day-editor-card.is-inactive {
+  opacity: 0.7;
+  background: #f8f6f3;
+}
+
+.day-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.day-name-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 19px;
+  height: 19px;
+  accent-color: #776050;
+  cursor: pointer;
+}
+
+.day-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #493b31;
+}
+
+.day-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.day-badge.badge-open {
+  background: #e6f4ea;
+  color: #1e6333;
+}
+
+.day-badge.badge-closed {
+  background: #faeaea;
+  color: #922d29;
+}
+
+.modality-select-wrap select {
+  padding: 6px 10px;
+  border: 1px solid #a08c7850;
+  border-radius: 8px;
+  background: #fdfbf9;
+  font-size: 12px;
+  color: #493b31;
+}
+
+.day-ranges-container {
+  background: #f7f4f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.ranges-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ranges-header small {
+  font-weight: 600;
+  color: #6d5b4e;
+  font-size: 12px;
+}
+
+.btn-add-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #a08c7840;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #604d40;
+  cursor: pointer;
+}
+
+.btn-add-range:hover {
+  background: #f0e9e4;
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.range-row:last-child {
+  margin-bottom: 0;
+}
+
+.range-index {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e4dad4;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: #604d40;
+}
+
+.time-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.time-input-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #604d40;
+}
+
+.time-input-group input[type="time"] {
+  padding: 5px 8px;
+  border: 1px solid #a08c7860;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 13px;
+  color: #493b31;
+}
+
+.btn-remove-range {
+  background: transparent;
+  border: 0;
+  color: #a33a38;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+
+.btn-remove-range:hover {
+  background: #faeaea;
+}
+
+.day-inactive-notice p {
+  margin: 0;
+  font-size: 12px;
+  color: #928073;
+  font-style: italic;
+}
+
+/* =========================================
+   PESTAÑA GOOGLE CALENDAR
+   ========================================= */
+.calendar-setup-card {
+  background: #faf7f4;
+  border: 1px solid #a08c7835;
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.calendar-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.calendar-card-header svg {
+  color: #776050;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.calendar-card-header h3 {
+  font: normal 18px/1.2 Georgia, serif;
+  margin: 0 0 4px;
+  color: #554134;
+}
+
+.calendar-card-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #776457;
+  line-height: 1.5;
+}
+
+.calendar-input-box {
+  margin-bottom: 18px;
+}
+
+.calendar-input-box label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #493b31;
+}
+
+.input-with-action {
+  display: flex;
+  gap: 10px;
+}
+
+.input-with-action input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #a08c7860;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.warning-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #b05128;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.calendar-steps-guide {
+  background: #ffffff;
+  border: 1px solid #a08c7825;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.calendar-steps-guide h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #554134;
+}
+
+.calendar-steps-guide ol {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #6a574b;
+  line-height: 1.6;
+}
+
+.calendar-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.action-box {
+  background: #faf8f5;
+  border: 1px solid #a08c7835;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.action-box svg {
+  color: #776050;
+}
+
+.action-box h4 {
+  font-size: 15px;
+  margin: 0 0 4px;
+  color: #493b31;
+}
+
+.action-box p {
+  margin: 0;
+  font-size: 12px;
+  color: #796658;
+  line-height: 1.5;
+}
+
+.badge-highlight {
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f0e9e4;
+  color: #5a4639;
+  font-weight: 500;
+  width: max-content;
+}
+
+/* =========================================
+   PESTAÑA CONSULTORIO
+   ========================================= */
+.consultorio-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.consultorio-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #554134;
+}
+
+.consultorio-form-grid input,
+.consultorio-form-grid textarea {
+  padding: 10px 12px;
+  border: 1px solid #a08c7860;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #faf8f5;
+  color: #493b31;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.consultorio-form-grid input:focus,
+.consultorio-form-grid textarea:focus {
+  outline: 2px solid #776050;
+  border-color: #776050;
+}
+
+/* =========================================
+   PIE DEL MODAL (FOOTER)
+   ========================================= */
+.admin-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #faf7f4;
+  border-top: 1px solid #a08c7830;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.footer-left-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-btn-save-main {
+  background: #776050;
+  border-color: #776050;
+}
+
+.admin-btn-save-main:hover {
+  background: #624b3c;
+}
+
+/* Modal secundario cambiar PIN */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 22, 17, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.admin-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 26px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+}
+
+.admin-modal-content h3 {
+  font: normal 20px/1.2 Georgia, serif;
+  margin: 0 0 6px;
+  color: #554134;
+}
+
+.admin-modal-content p {
+  font-size: 13px;
+  color: #7a6657;
+  margin-bottom: 16px;
+}
+
+.admin-modal-content label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.admin-modal-content input {
+  padding: 10px 12px;
+  border: 1px solid #a08c7860;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.modal-msg {
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.modal-msg.success {
+  background: #e6f4ea;
+  color: #1e6333;
+}
+
+.modal-msg.error {
+  background: #faeaea;
+  color: #a33a38;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* ==========================================================================
+   SECCIONES 01, 02 Y 03: TARJETAS PLEGABLES CON ESTILO IDÉNTICO A LA AGENDA
+   ========================================================================== */
+
+.section-card {
+  max-width: 1240px;
+  margin: 0 auto 55px;
+  padding: 50px 60px;
+  border-radius: 28px;
+  border: 1px solid #ffffff90;
+  box-shadow: 0 15px 35px #77605008;
+  transition: padding 0.3s ease, box-shadow 0.25s ease;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+}
+
+.section-card:hover {
+  box-shadow: 0 18px 40px #77605012;
+}
+
+/* Sección 01: Servicios Clínicos */
+.clinical-card-section {
+  background: radial-gradient(ellipse at 0 0, #faf3ee, transparent 70%), #e8ded8;
+  border-color: #ffffffb0;
+}
+
+/* Sección 02: Servicios Organizacionales */
+.org-card-section {
+  background: radial-gradient(ellipse at 100% 0, #f2eae4, transparent 70%), #ded3cc;
+  border-color: #ffffffa0;
+}
+
+/* Sección 03: Agenda tu Cita */
+.agenda-card-section,
+.agenda.section-card {
+  display: block !important;
+  background: radial-gradient(ellipse at 0 0, #efdfda, transparent 70%), #d9cbc2;
+  border-color: #ffffff90;
+  margin-bottom: 75px;
+}
+
+/* Estado plegado (compacto) */
+.section-card.is-folded {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
+/* Encabezado interactivo de cada tarjeta */
+.section-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  width: 100%;
+}
+
+.section-card-header:focus-visible {
+  outline: 3px solid #776050;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.section-card-header .eyebrow {
+  margin: 0 0 8px;
+}
+
+.section-card-header h2 {
+  margin: 0 0 6px;
+  font: normal clamp(30px, 3.2vw, 46px)/1.15 Georgia, serif;
+  color: #554134;
+}
+
+.section-card-subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: #796557;
+  line-height: 1.5;
+  max-width: 580px;
+}
+
+/* Botón píldora "Abrir" / "Cerrar" */
+.card-toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 30px;
+  background: #776050;
+  color: #ffffff;
+  border: 1px solid #776050;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(119, 96, 80, 0.16);
+  flex-shrink: 0;
+}
+
+.section-card-header:hover .card-toggle-pill {
+  background: #624b3c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(119, 96, 80, 0.24);
+}
+
+.card-chevron-icon {
+  color: #ffffff;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* Contenido desplegable interior */
+.section-card-body {
+  margin-top: 36px;
+  padding-top: 36px;
+  border-top: 1px solid #a08c7830;
+  animation: cardExpand 0.28s ease-out;
+}
+
+@keyframes cardExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Layout específico de Sección 02 (Organizaciones) dentro de su tarjeta */
+.org-card-section .section-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 50px;
+  align-items: start;
+}
+
+.org-intro-block h2 {
+  font: normal clamp(28px, 2.7vw, 40px)/1.2 Georgia, serif;
+  color: #554134;
+  margin: 0 0 20px;
+}
+
+/* Layout específico de Sección 03 (Agenda) dentro de su tarjeta */
+.agenda-body-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.agenda-intro-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.agenda-intro-col p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #554438;
+  margin: 0;
+}
+
+.agenda-actions-wrapper {
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   SCHEDULE VIEWER (SIN RESUMEN DE LA SEMANA)
+   ========================================================================== */
+.schedule-viewer {
+  background: #ffffff;
+  border: 1px solid #ffffffa0;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 8px 25px #7760500e;
+  color: #554438;
+}
+
+.schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.schedule-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #f7f3ef;
+  color: #604d40;
+  padding: 5px 12px;
+  border-radius: 18px;
+  border: 1px solid #a08c7830;
+}
+
+.session-duration {
+  font-size: 12px;
+  color: #7a6657;
+  font-weight: 500;
+}
+
+/* Selector de 7 días (totalmente responsive) */
+.schedule-days-nav {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.schedule-day-pill {
+  background: #f6f3ee;
+  border: 1px solid #a08c7835;
+  border-radius: 10px;
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.schedule-day-pill:hover {
+  background: #eee8e2;
+}
+
+.schedule-day-pill.selected {
+  background: #776050;
+  color: #ffffff;
+  border-color: #776050;
+  box-shadow: 0 4px 10px #7760502a;
+}
+
+.pill-short {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.today-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #487350;
+}
+
+.schedule-day-pill.selected .today-dot {
+  background: #ffffff;
+}
+
+.pill-status {
+  font-size: 9px;
+  color: #928073;
+  white-space: nowrap;
+}
+
+.schedule-day-pill.selected .pill-status {
+  color: #dcc3c2;
+}
+
+.schedule-day-pill.inactive {
+  opacity: 0.65;
+}
+
+/* Tarjeta del día seleccionado */
+.schedule-day-card {
+  background: #faf7f4;
+  border: 1px solid #a08c7830;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.day-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #a08c7820;
+}
+
+.day-card-header h3 {
+  font: normal 22px/1.2 Georgia, serif;
+  margin: 0 0 4px;
+  color: #554134;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-today {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  background: #487350;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+
+.status-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.status-pill.open {
+  background: #e6f4ea;
+  color: #1e6333;
+}
+
+.status-pill.closed {
+  background: #faeaea;
+  color: #922d29;
+}
+
+.day-modalities {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.modality-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #a08c7835;
+  padding: 4px 8px;
+  border-radius: 14px;
+  font-size: 11px;
+  color: #604d40;
+}
+
+.ranges-list {
+  margin-bottom: 16px;
+}
+
+.ranges-title {
+  display: block;
+  font-size: 12px;
+  color: #796658;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.ranges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.range-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #a08c7830;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #493b31;
+}
+
+.range-item svg {
+  color: #776050;
+}
+
+.range-tag {
+  margin-left: auto;
+  font-size: 10px;
+  background: #f0e9e4;
+  color: #604d40;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.closed-day-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #8c786a;
+  line-height: 1.5;
+}
+
+.schedule-notice {
+  font-size: 12px;
+  color: #7a6657;
+  font-style: italic;
+  margin: 10px 0 16px;
+  line-height: 1.5;
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.schedule-btn-calendar {
+  background: #776050;
+}
+
+.schedule-btn-wa {
+  background: #487350;
+  border-color: #487350;
+}
+
+.schedule-btn-wa:hover {
+  background: #395c40;
+}
+
+/* =========================================
+   BOTONES FOOTER Y ACCIONES DE ADMIN
+   ========================================= */
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0e9e4;
+  border: 1px solid #a08c7840;
+  color: #604d40;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-link-btn:hover {
+  background: #776050;
+  color: #ffffff;
+  border-color: #776050;
+}
+
+/* Animaciones */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   ADAPTACIONES RESPONSIVAS PARA CELULAR (MOBILE-FIRST)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .admin-modal-overlay {
+    padding: 12px;
+  }
+
+  .admin-modal-window {
+    max-height: 96vh;
+    border-radius: 16px;
+  }
+
+  .admin-two-cols,
+  .calendar-actions-grid,
+  .consultorio-form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .admin-modal-header {
+    padding: 14px 18px;
+  }
+
+  .admin-modal-body {
+    padding: 18px;
+  }
+
+  .admin-modal-footer {
+    padding: 12px 18px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .section-card {
+    padding: 42px 38px;
+    margin-bottom: 45px;
+  }
+
+  .agenda-body-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .org-card-section .section-card-body {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 700px) {
+  .section-card {
+    margin: 0 -4px 30px;
+    padding: 28px 20px;
+    border-radius: 24px;
+  }
+
+  .section-card.is-folded {
+    padding: 24px 20px;
+  }
+
+  .section-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .section-card-header h2 {
+    font-size: 32px;
+  }
+
+  .section-card-subtitle {
+    font-size: 14px;
+  }
+
+  .card-toggle-pill {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+  .section-card-body {
+    margin-top: 24px;
+    padding-top: 24px;
+  }
+
+  .org-card-section .section-card-body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .agenda-body-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .admin-modal-overlay {
+    padding: 0;
+  }
+
+  .admin-modal-window {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .admin-modal-header {
+    padding: 12px 16px;
+  }
+
+  .admin-modal-title-group h2 {
+    font-size: 16px;
+  }
+
+  .admin-modal-title-group p {
+    display: none;
+  }
+
+  .admin-modal-tabs {
+    padding: 0 8px;
+  }
+
+  .admin-modal-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .admin-modal-body {
+    padding: 16px;
+  }
+
+  .day-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .modality-select-wrap {
+    width: 100%;
+  }
+
+  .modality-select-wrap select {
+    width: 100%;
+  }
+
+  .range-row {
+    flex-direction: column;
+    align-items: stretch;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .time-input-group {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .time-input-group label {
+    flex: 1;
+  }
+
+  .time-input-group input[type="time"] {
+    width: 100%;
+  }
+
+  .input-with-action {
+    flex-direction: column;
+  }
+
+  .input-with-action .button {
+    width: 100%;
+  }
+
+  .admin-modal-footer {
+    flex-direction: column-reverse;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .footer-left-tools {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .footer-left-tools .button {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .footer-right-actions {
+    width: 100%;
+  }
+
+  .footer-right-actions .button {
+    width: 100%;
+  }
+
+  .day-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .schedule-actions {
+    flex-direction: column;
+  }
+
+  .schedule-actions .button {
+    width: 100%;
+  }
+
+  /* Schedule viewer en móvil */
+  .schedule-days-nav {
+    gap: 4px;
+  }
+
+  .schedule-day-pill {
+    padding: 8px 2px;
+  }
+
+  .pill-short {
+    font-size: 11px;
+  }
+
+  .pill-status {
+    font-size: 8px;
+  }
+}
+
+/* ==========================================================================
+   TARJETA PRINCIPAL HERO LIMPIA (SOLO ILUSTRACIÓN SIN ARCO, RAYAS NI FIRMA)
+   ========================================================================== */
+.hero-art.clean-hero-art,
+.hero-art {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+.hero-art::after {
+  display: none !important;
+}
+
+.hero-art .stripes,
+.hero-art .signature {
+  display: none !important;
+}
+
+.hero-art .botanical,
+.hero-logo-clean {
+  width: 100% !important;
+  max-width: 500px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  display: block !important;
+  mix-blend-mode: normal !important;
+  filter: drop-shadow(0 14px 30px rgba(119, 96, 80, 0.09));
+  transition: transform 0.3s ease;
+}
+
+.hero-art .botanical:hover,
+.hero-logo-clean:hover {
+  transform: scale(1.02);
+}
+
+@media (max-width: 1050px) {
+  .hero-art,
+  .hero-art.clean-hero-art {
+    min-height: auto !important;
+  }
+  .hero-art .botanical,
+  .hero-logo-clean {
+    max-width: 420px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .hero-art,
+  .hero-art.clean-hero-art {
+    min-height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 8px 0 !important;
+    margin: 0 auto !important;
+  }
+  .hero-art .botanical,
+  .hero-logo-clean {
+    max-width: 340px !important;
+    width: 95% !important;
+    margin: 0 auto !important;
+  }
+}
