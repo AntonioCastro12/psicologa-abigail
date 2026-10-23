@@ -1004,28 +1004,29 @@ input:checked + .slider:before {
   max-width: 580px;
 }
 
-/* Botón píldora "Abrir" / "Cerrar" */
+/* Botón píldora "Abrir" / "Cerrar" en tonos suaves y discretos */
 .card-toggle-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 22px;
+  padding: 10px 20px;
   border-radius: 30px;
-  background: #776050;
-  color: #ffffff;
-  border: 1px solid #776050;
-  font-size: 14px;
-  font-weight: 500;
+  background: #9f8f84 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(140, 124, 114, 0.4) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
   cursor: pointer;
   transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(119, 96, 80, 0.16);
+  box-shadow: 0 2px 8px rgba(115, 98, 88, 0.12) !important;
   flex-shrink: 0;
 }
 
-.section-card-header:hover .card-toggle-pill {
-  background: #624b3c;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(119, 96, 80, 0.24);
+.section-card-header:hover .card-toggle-pill,
+.card-toggle-pill:hover {
+  background: #918177 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(115, 98, 88, 0.18) !important;
 }
 
 .card-chevron-icon {
@@ -1630,11 +1631,25 @@ input:checked + .slider:before {
 }
 
 /* ==========================================================================
-   TARJETA PRINCIPAL HERO LIMPIA (SOLO ILUSTRACIÓN SIN ARCO, RAYAS NI FIRMA)
+   ELIMINAR MÁRGENES BLANCOS GLOBALES Y DEL CANVAS
    ========================================================================== */
-.hero-art.clean-hero-art,
-.hero-art {
+html,
+body,
+#root {
+  background-color: #e6e6e6 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   ILUSTRACIÓN FLOTANTE INDEPENDIENTE (SOLA, SIN TARJETA NI FONDOS)
+   ========================================================================== */
+.hero-art,
+.hero-art.hero-floating-only {
   background: transparent !important;
+  border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   min-height: auto !important;
@@ -1642,60 +1657,478 @@ input:checked + .slider:before {
   align-items: center !important;
   justify-content: center !important;
   overflow: visible !important;
-  padding: 0 !important;
+  padding: 10px 0 !important;
   position: relative;
+  width: 100%;
 }
 
-.hero-art::after {
-  display: none !important;
-}
-
+.hero-art::after,
+.hero-art::before,
 .hero-art .stripes,
 .hero-art .signature {
   display: none !important;
 }
 
-.hero-art .botanical,
-.hero-logo-clean {
+/* Ilustración sola con animación suave de flotación continua */
+.hero-floating-logo,
+.hero-art img {
   width: 100% !important;
-  max-width: 500px !important;
+  max-width: 460px !important;
   height: auto !important;
   margin: 0 auto !important;
   display: block !important;
-  mix-blend-mode: normal !important;
-  filter: drop-shadow(0 14px 30px rgba(119, 96, 80, 0.09));
-  transition: transform 0.3s ease;
+  mix-blend-mode: multiply !important;
+  animation: continuousFloat 4.8s ease-in-out infinite !important;
+  will-change: transform;
 }
 
-.hero-art .botanical:hover,
-.hero-logo-clean:hover {
-  transform: scale(1.02);
+@keyframes continuousFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 @media (max-width: 1050px) {
-  .hero-art,
-  .hero-art.clean-hero-art {
-    min-height: auto !important;
-  }
-  .hero-art .botanical,
-  .hero-logo-clean {
-    max-width: 420px !important;
+  .hero-floating-logo,
+  .hero-art img {
+    max-width: 380px !important;
   }
 }
 
 @media (max-width: 700px) {
   .hero-art,
-  .hero-art.clean-hero-art {
+  .hero-art.hero-floating-only {
     min-height: auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 8px 0 !important;
+    padding: 16px 0 !important;
     margin: 0 auto !important;
   }
-  .hero-art .botanical,
-  .hero-logo-clean {
-    max-width: 340px !important;
-    width: 95% !important;
-    margin: 0 auto !important;
+
+  .hero-floating-logo,
+  .hero-art img {
+    max-width: 300px !important;
+    width: 86% !important;
+  }
+
+  @keyframes continuousFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-floating-logo,
+  .hero-art img {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   BOTONES HERO CON COLORES TENUES Y BOTONES RÁPIDOS COMPACTOS (SIN NÚMERO)
+   ========================================================================== */
+
+.hero-cta-group {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Botón Agendar Cita: Tono tenue moka/taupe cálido, suave y discreto */
+.btn-booking-hero,
+.hero .actions .btn-booking-hero,
+.actions .btn-booking-hero {
+  background: linear-gradient(135deg, #9f8f84 0%, #8c7c72 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(140, 124, 114, 0.4) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 3px 10px rgba(115, 98, 88, 0.12) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.3px;
+  padding: 12px 20px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-booking-hero:hover,
+.hero .actions .btn-booking-hero:hover {
+  background: linear-gradient(135deg, #918177 0%, #807066 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(115, 98, 88, 0.18) !important;
+}
+
+/* Botón WhatsApp: Tono verde salvia / eucalipto suave y tenue */
+.btn-whatsapp-hero,
+.hero .actions .btn-whatsapp-hero,
+.actions .btn-whatsapp-hero {
+  background: linear-gradient(135deg, #7b9c88 0%, #698975 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(105, 137, 117, 0.4) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 3px 10px rgba(85, 115, 95, 0.12) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.3px;
+  padding: 12px 20px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-whatsapp-hero:hover,
+.hero .actions .btn-whatsapp-hero:hover {
+  background: linear-gradient(135deg, #6f907c 0%, #5d7d69 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(85, 115, 95, 0.18) !important;
+}
+
+/* Botones rápidos de contacto: Solo botones (sin números ni textos largos) */
+.hero-quick-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.subtle-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(160, 140, 120, 0.32);
+  border-radius: 20px;
+  color: #6c5a4d;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 6px rgba(119, 96, 80, 0.04);
+}
+
+.subtle-pill-btn:hover {
+  background: #ffffff;
+  border-color: rgba(140, 120, 100, 0.45);
+  color: #43352c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(119, 96, 80, 0.08);
+}
+
+.subtle-pill-btn svg {
+  color: #857365;
+  transition: transform 0.2s;
+}
+
+.subtle-pill-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* ==========================================================================
+   BARRA FLOTANTE INFERIOR (SIEMPRE FIJA AL VIEWPORT, TONOS TENUES)
+   ========================================================================== */
+
+/* En la transición inicial no deben verse los botones flotantes */
+.is-revealing-behind .floating,
+body:has(.opening-intro) .floating {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.floating {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 8px !important;
+  background: rgba(246, 243, 239, 0.94) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-radius: 36px !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 8px 24px rgba(85, 70, 60, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: floating-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+@keyframes floating-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floating .button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  padding: 9px 16px !important;
+  min-height: 38px !important;
+  border-radius: 20px !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+.floating .button:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* Agendar cita flotante: tono tenue moka/taupe */
+.floating .button:first-child,
+.floating .button:not(.floating-wa) {
+  background: linear-gradient(135deg, #9f8f84 0%, #8c7c72 100%) !important;
+  border: 1px solid rgba(140, 124, 114, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.floating .button:first-child:hover,
+.floating .button:not(.floating-wa):hover {
+  background: linear-gradient(135deg, #918177 0%, #807066 100%) !important;
+  box-shadow: 0 4px 10px rgba(115, 98, 88, 0.18) !important;
+}
+
+/* WhatsApp flotante: tono salvia suave */
+.floating .floating-wa {
+  background: linear-gradient(135deg, #7b9c88 0%, #698975 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(105, 137, 117, 0.4) !important;
+}
+
+.floating .floating-wa:hover {
+  background: linear-gradient(135deg, #6f907c 0%, #5d7d69 100%) !important;
+  box-shadow: 0 4px 10px rgba(85, 115, 95, 0.18) !important;
+}
+
+/* Móvil: distribución fluida y proporcionada */
+@media (max-width: 700px) {
+  .hero-cta-group {
+    margin-top: 18px;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .hero-actions .button {
+    flex: 1;
+    min-height: 46px;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    justify-content: center;
+  }
+
+  .hero-quick-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .subtle-pill-btn {
+    padding: 7px 13px;
+    font-size: 12px;
+    border-radius: 18px;
+  }
+
+  /* Barra flotante en móvil: fija, simétrica y con texto en una línea */
+  .floating {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    justify-content: center !important;
+    padding: 6px 8px !important;
+    gap: 8px !important;
+  }
+
+  .floating .button {
+    flex: 1 !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    min-height: 42px !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* ==========================================================================
+   TRANSICIÓN DE APERTURA CON ZOOM AL ABRIR LA TARJETA (SIN ARCO NI RAYAS)
+   ========================================================================== */
+
+.opening-intro {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 24px !important;
+  background: radial-gradient(ellipse at 50% 45%, #faf6f2 0%, #ebe2db 70%, #ded2c9 100%) !important;
+  animation: opening-fade-zoom 600ms cubic-bezier(0.4, 0, 0.2, 1) 1600ms both !important;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.opening-intro-content {
+  width: min(100%, 460px) !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  animation: intro-content-enter 900ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+/* Emblema limpio: sin arco, sin rayas, sin bordes */
+.opening-emblem,
+.opening-emblem-clean {
+  position: relative !important;
+  width: min(100%, 360px, 46svh) !important;
+  margin: 0 auto 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.opening-emblem::after,
+.opening-emblem-clean::after,
+.opening-lines {
+  display: none !important;
+}
+
+.opening-logo,
+.opening-logo-clean {
+  width: 100% !important;
+  max-width: 330px !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+  mix-blend-mode: multiply !important;
+  filter: drop-shadow(0 14px 28px rgba(119, 96, 80, 0.12)) !important;
+  animation: emblem-zoom-pulse 1600ms ease-in-out infinite alternate !important;
+}
+
+.opening-name {
+  margin-top: 10px !important;
+  animation: intro-name-enter 800ms ease-out 350ms both !important;
+}
+
+/* Animaciones de ZOOM al abrir la tarjeta */
+@keyframes intro-content-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.78) translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes emblem-zoom-pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes intro-name-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efecto ZOOM cinematográfico al abrir la tarjeta digital */
+@keyframes opening-fade-zoom {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.32);
+    filter: blur(8px);
+    visibility: hidden;
+  }
+}
+
+/* Botón de agendar en la cabecera en tonos tenues y armónicos */
+header .button,
+.header-book {
+  background: #9f8f84 !important;
+  border: 1px solid rgba(140, 124, 114, 0.4) !important;
+  color: #ffffff !important;
+  border-radius: 22px !important;
+  padding: 10px 18px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 8px rgba(115, 98, 88, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+header .button:hover,
+.header-book:hover {
+  background: #918177 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* El contenedor principal permanece limpio y sin transformaciones para que la barra flotante se fije al viewport */
+.app-wrapper,
+.app-wrapper.is-revealed,
+.app-wrapper.is-revealing-behind {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-intro {
+    display: none !important;
   }
 }

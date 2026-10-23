@@ -119,7 +119,7 @@ const organizational = [
   },
 ];
 
-function App() {
+function App({ showIntro = false }: { showIntro?: boolean } = {}) {
   const [schedule, setSchedule] = useState<SiteScheduleConfig>(readInitialSchedule);
   const [currentView, setCurrentView] = useState<"site" | "admin">(() => {
     return window.location.pathname === "/admin" ||
@@ -265,7 +265,7 @@ function App() {
 
   const Booking = ({
     label = "Agendar cita",
-    className = "button",
+    className = "button btn-booking-hero",
   }: {
     label?: string;
     className?: string;
@@ -292,7 +292,7 @@ function App() {
   const Whatsapp = ({
     label = "WhatsApp",
     message = defaultMessage,
-    className = "button outline",
+    className = "button btn-whatsapp-hero",
   }: {
     label?: string;
     message?: string;
@@ -388,30 +388,41 @@ function App() {
               Soy Abigail Sánchez, psicóloga. Te acompaño a comprender lo que
               sientes y a construir herramientas para tu día a día.
             </p>
-            <div className="actions">
-              <Booking />
-              <Whatsapp />
+            <div className="hero-cta-group">
+    
+              <div className="hero-quick-buttons">
+                <a
+                  className="subtle-pill-btn"
+                  href={`tel:+${phone}`}
+                  title="Llamar a Abigail Sánchez"
+                >
+                  <Phone size={14} />
+                  <span>Llamar</span>
+                </a>
+                <a
+                  className="subtle-pill-btn"
+                  href="mailto:ma.sanvag@gmail.com"
+                  title="Enviar correo a Abigail Sánchez"
+                >
+                  <Mail size={14} />
+                  <span>Correo</span>
+                </a>
+                <button
+                  type="button"
+                  className="subtle-pill-btn"
+                  onClick={saveContact}
+                  title="Guardar contacto en tu teléfono"
+                >
+                  <Download size={14} />
+                  <span>Guardar contacto</span>
+                </button>
+              </div>
             </div>
-            <div className="quick">
-              <a href={`tel:+${phone}`}>
-                <Phone size={16} /> Llamar
-              </a>
-              <a href="mailto:ma.sanvag@gmail.com">
-                <Mail size={16} /> Correo
-              </a>
-              <button onClick={saveContact}>
-                <Download size={16} /> Guardar contacto
-              </button>
-            </div>
-            <p className="hero-contact">
-              +{phone} <span>·</span>{" "}
-              <a href="mailto:ma.sanvag@gmail.com">ma.sanvag@gmail.com</a>
-            </p>
           </div>
-          <div className="hero-art clean-hero-art">
+          <div className="hero-art hero-floating-only">
             <img
-              className="botanical hero-logo-clean"
-              src="/ilustracion.png?v=2"
+              className="hero-floating-logo"
+              src="/ilustracion.png?v=5"
               width="1024"
               height="682"
               alt="Emblema de Abigail Sánchez: mente, corazón y hojas entrelazados"
@@ -675,36 +686,10 @@ function App() {
               </div>
               <ArrowUpRight size={20} />
             </a>
-            <div className="address">
+            {/* <div className="address">
               <MapPin size={20} />
-              <div>
-                <small>ATENCIÓN PRESENCIAL Y VIRTUAL</small>
-                {schedule.officeName && <strong>{schedule.officeName}</strong>}
-                <p>
-                  {schedule.address ||
-                    "Consulta la ubicación del consultorio por WhatsApp."}
-                </p>
-                <p className="schedule-summary-contact">
-                  <strong>Horarios: </strong>
-                  {getScheduleSummaryText(schedule.days)}
-                </p>
-                <a
-                  className="text-link"
-                  href={
-                    schedule.address
-                      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(schedule.address)}`
-                      : wa(
-                          "Hola, quisiera conocer la ubicación del consultorio y los horarios de atención.",
-                        )
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {schedule.address ? "Cómo llegar" : "Consultar ubicación"}
-                  <ArrowUpRight size={16} />
-                </a>
-              </div>
-            </div>
+            
+            </div> */}
             {(instagram || facebook) && (
               <div className="socials">
                 {instagram && (
@@ -755,10 +740,12 @@ function App() {
         </div>
       </footer>
 
-      <div className="floating">
-        <Booking className="button small" />
-        <Whatsapp className="button small floating-wa" />
-      </div>
+      {!showIntro && (
+        <div className="floating">
+          <Booking className="button small" />
+          <Whatsapp className="button small floating-wa" />
+        </div>
+      )}
 
       {notice && (
         <div className="toast" role="status">
@@ -795,7 +782,7 @@ function IntroCard() {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const finish = () => setShowIntro(false);
-    const timeout = window.setTimeout(finish, 2000);
+    const timeout = window.setTimeout(finish, 2200);
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const onMotionChange = () => {
       if (motion.matches) finish();
@@ -810,24 +797,20 @@ function IntroCard() {
 
   return (
     <>
-      <div inert={showIntro} aria-hidden={showIntro || undefined}>
-        <App />
+      <div
+        inert={showIntro}
+        aria-hidden={showIntro || undefined}
+        className={`app-wrapper ${showIntro ? "is-revealing-behind" : "is-revealed"}`}
+      >
+        <App showIntro={showIntro} />
       </div>
       {showIntro && (
         <div className="opening-intro" aria-label="Abigail Sánchez, psicóloga">
           <div className="opening-intro-content">
-            <div className="opening-emblem">
-              <span
-                className="opening-lines opening-lines-right"
-                aria-hidden="true"
-              />
-              <span
-                className="opening-lines opening-lines-left"
-                aria-hidden="true"
-              />
+            <div className="opening-emblem-clean">
               <img
-                className="opening-logo"
-                src="/ilustracion.png?v=2"
+                className="opening-logo-clean"
+                src="/ilustracion.png?v=6"
                 alt="Emblema de Abigail Sánchez: mente, corazón y hojas entrelazados"
                 width="1024"
                 height="682"
