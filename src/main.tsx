@@ -148,9 +148,10 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
   const wa = (message = defaultMessage) =>
     `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-  const calendar = isGoogleCalendarUrl(schedule.calendarUrl)
-    ? schedule.calendarUrl
-    : safeUrl(schedule.calendarUrl, "calendar");
+  const calendar =
+    isGoogleCalendarUrl(schedule.calendarUrl)
+      ? schedule.calendarUrl
+      : safeUrl(schedule.calendarUrl, "calendar") || "https://calendar.google.com/calendar/u/0/r";
   const instagram = safeUrl(schedule.instagram);
   const facebook = safeUrl(schedule.facebook);
 
@@ -169,6 +170,23 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
       window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("hashchange", handlePopState);
     };
+  }, []);
+
+  // Suprimir cualquier iframe o badge inyectado por Netlify
+  useEffect(() => {
+    const purgeNetlifyHud = () => {
+      document
+        .querySelectorAll(
+          'iframe#nl-badge-frame, iframe#nl-hud-frame, iframe[title*="Netlify" i], iframe[title*="Powered by Netlify" i]',
+        )
+        .forEach((el) => {
+          el.remove();
+        });
+    };
+    purgeNetlifyHud();
+    const obs = new MutationObserver(purgeNetlifyHud);
+    obs.observe(document.body, { childList: true, subtree: true });
+    return () => obs.disconnect();
   }, []);
 
   // Save handler passed to AdminPanel
@@ -273,10 +291,10 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
     schedule.available ? (
       <a
         className={className}
-        href={calendar || wa(defaultMessage)}
+        href={calendar}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => setIsAgendaOpen(true)}
+        aria-label="Abrir Google Calendar para agendar cita con Abigail Sánchez"
       >
         <CalendarDays size={18} />
         {label}
@@ -316,14 +334,17 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
       </a>
       <header>
         <a
-          className="brand"
+          className="brand brand-image-link"
           href="#inicio"
-          aria-label="Abigail Sánchez, inicio"
+          aria-label="Abigail Sánchez, psicóloga"
         >
-          AS
-          <span>
-            ABIGAIL SÁNCHEZ<small>PSICÓLOGA</small>
-          </span>
+          <img
+            src="/logo-abigail.png"
+            alt="Abigail Sánchez · Psicóloga"
+            className="brand-logo-img"
+            width="820"
+            height="640"
+          />
         </a>
         <nav className={menu ? "open" : ""} aria-label="Navegación principal">
           {[
@@ -349,9 +370,12 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
         </nav>
         <a
           className="button small header-book"
-          href="#agenda"
-          onClick={() => setIsAgendaOpen(true)}
+          href={calendar}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abrir Google Calendar para agendar cita"
         >
+          <CalendarDays size={16} />
           Agendar cita <ArrowUpRight size={16} />
         </a>
         <button
@@ -711,11 +735,14 @@ function App({ showIntro = false }: { showIntro?: boolean } = {}) {
       </main>
 
       <footer>
-        <a className="brand" href="#inicio">
-          AS
-          <span>
-            ABIGAIL SÁNCHEZ<small>PSICÓLOGA</small>
-          </span>
+        <a className="brand brand-image-link" href="#inicio" aria-label="Abigail Sánchez, psicóloga">
+          <img
+            src="/logo-abigail.png"
+            alt="Abigail Sánchez · Psicóloga"
+            className="brand-logo-img footer-brand-img"
+            width="820"
+            height="640"
+          />
         </a>
         <span>Psicología y servicios organizacionales</span>
 

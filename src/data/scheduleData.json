@@ -2,7 +2,7 @@
   "available": true,
   "sessionDurationMinutes": 50,
   "notice": "Atención psicológica presencial y virtual previa reservación.",
-  "calendarUrl": "",
+  "calendarUrl": "https://calendar.google.com/calendar/u/0/r",
   "googleCalendarEmail": "ma.sanvag@gmail.com",
   "phone": "524427045630",
   "whatsappMessage": "Hola, quisiera agendar una cita. ¿Me puedes compartir los horarios disponibles?",

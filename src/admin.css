@@ -2116,6 +2116,45 @@ header .button:hover,
   transform: translateY(-1px) !important;
 }
 
+/* ==========================================================================
+   LOGO OFICIAL EN CABECERA Y PIE DE PÁGINA (ESQUINA SUPERIOR IZQUIERDA)
+   ========================================================================== */
+.brand.brand-image-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.brand-logo-img {
+  height: 72px !important;
+  width: auto !important;
+  max-width: 200px !important;
+  object-fit: contain !important;
+  display: block !important;
+  transition: transform 0.25s ease !important;
+  mix-blend-mode: multiply !important;
+}
+
+.brand.brand-image-link:hover .brand-logo-img {
+  transform: scale(1.03) !important;
+}
+
+.footer-brand-img {
+  height: 58px !important;
+  max-width: 170px !important;
+}
+
+@media (max-width: 700px) {
+  .brand-logo-img {
+    height: 56px !important;
+    max-width: 160px !important;
+  }
+}
+
 /* El contenedor principal permanece limpio y sin transformaciones para que la barra flotante se fije al viewport */
 .app-wrapper,
 .app-wrapper.is-revealed,
@@ -2125,6 +2164,34 @@ header .button:hover,
   perspective: none !important;
   contain: none !important;
   animation: none !important;
+}
+
+/* ==========================================================================
+   SUPRESIÓN TOTAL DEL WIDGET / HUD / BADGE INYECTADO POR NETLIFY
+   ========================================================================== */
+#nl-badge-frame,
+#nl-hud-frame,
+iframe[id^="nl-"],
+iframe[title*="Netlify" i],
+iframe[title*="Powered by Netlify" i],
+iframe[src*="netlify" i],
+.nl-badge,
+.nl-prompt,
+[data-netlify-site-id],
+[data-nf-variant] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: -99999px !important;
+  z-index: -9999 !important;
+  clip-path: path("M0 0Z") !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
