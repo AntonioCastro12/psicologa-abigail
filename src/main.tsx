@@ -26,8 +26,11 @@ import {
   Lock,
   ChevronDown,
 } from "lucide-react";
+// @ts-expect-error CSS side-effect imports are handled by the bundler.
 import "./style.css";
+// @ts-expect-error CSS side-effect imports are handled by the bundler.
 import "./refinements.css";
+// @ts-expect-error CSS side-effect imports are handled by the bundler.
 import "./admin.css";
 import initialScheduleData from "./data/scheduleData.json";
 import { SiteScheduleConfig } from "./types/schedule";
